@@ -100,7 +100,7 @@ if __name__ == '__main__':
     logger.configure(handlers=[{"sink": sys.stdout, "serialize": JSON_LOGS}])
 
     options = {
-        "bind": "0.0.0.0",
+        "bind": "0.0.0.0:80",
         "workers": WORKERS,
         "accesslog": "-",
         "errorlog": "-",
