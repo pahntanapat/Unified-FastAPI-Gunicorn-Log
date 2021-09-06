@@ -15,7 +15,7 @@ WORKDIR /app
 COPY ./requirements.txt /app
 
 ## Imstall llvm and numba seprately due to ARM64 problem
-RUN apt-get install -y git && pip install yarf && \
+RUN apt-get install -y git && pip install yapf pylint && \
     pip install --no-cache-dir -r requirements.txt 
 #install --pre torch torchvision -f https://download.pytorch.org/whl/nightly/cpu/torch_nightly.html
 #pip install torch==1.8.1+cpu torchvision==0.9.1+cpu torchaudio==0.8.1 -f https://download.pytorch.org/whl/lts/1.8/torch_lts.html
