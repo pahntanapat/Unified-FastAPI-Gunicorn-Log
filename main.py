@@ -5,13 +5,27 @@ import sys
 from gunicorn.app.base import BaseApplication
 from gunicorn.glogging import Logger
 from loguru import logger
-
-from my_app.app import app
-
+from fastapi import FastAPI, Response
+from fastapi.responses import ORJSONResponse
+from datetime import datetime
 
 LOG_LEVEL = logging.getLevelName(os.environ.get("LOG_LEVEL", "DEBUG"))
 JSON_LOGS = True if os.environ.get("JSON_LOGS", "0") == "1" else False
 WORKERS = int(os.environ.get("GUNICORN_WORKERS", "5"))
+
+app = FastAPI(
+    debug=os.environ.get('DEBUG', False),
+    title='RESUME: The Medical Speech-to-Text API',
+    description=
+    'Convert medical speech either conversation or dictation to medical record document',
+    default_response_class=ORJSONResponse,
+    version='0.1.0')
+
+
+@app.get('/test')
+def test(response: Response):
+    response.set_cookie('start', datetime.now().isoformat(), max_age=3600)
+    return {'response_time': datetime.now().isoformat()}
 
 
 class InterceptHandler(logging.Handler):
@@ -28,7 +42,8 @@ class InterceptHandler(logging.Handler):
             frame = frame.f_back
             depth += 1
 
-        logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
+        logger.opt(depth=depth,
+                   exception=record.exc_info).log(level, record.getMessage())
 
 
 class StubbedGunicornLogger(Logger):
@@ -44,7 +59,6 @@ class StubbedGunicornLogger(Logger):
 
 class StandaloneApplication(BaseApplication):
     """Our Gunicorn application."""
-
     def __init__(self, app, options=None):
         self.options = options or {}
         self.application = app
@@ -52,7 +66,8 @@ class StandaloneApplication(BaseApplication):
 
     def load_config(self):
         config = {
-            key: value for key, value in self.options.items()
+            key: value
+            for key, value in self.options.items()
             if key in self.cfg.settings and value is not None
         }
         for key, value in config.items():
@@ -70,13 +85,13 @@ if __name__ == '__main__':
 
     seen = set()
     for name in [
-        *logging.root.manager.loggerDict.keys(),
-        "gunicorn",
-        "gunicorn.access",
-        "gunicorn.error",
-        "uvicorn",
-        "uvicorn.access",
-        "uvicorn.error",
+            *logging.root.manager.loggerDict.keys(),
+            "gunicorn",
+            "gunicorn.access",
+            "gunicorn.error",
+            "uvicorn",
+            "uvicorn.access",
+            "uvicorn.error",
     ]:
         if name not in seen:
             seen.add(name.split(".")[0])
