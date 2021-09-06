@@ -1,0 +1,9 @@
+version: "3.4"
+
+services:
+  gunicorn-spawn:
+    image: gunicorn-spawn
+    restart: always
+    build:
+      context: .
+      dockerfile: ./dockerfile
