@@ -13,8 +13,6 @@ RUN TZ="Asia/Bangkok" && \
 
 WORKDIR /app
 COPY ./requirements.txt /app
-COPY ./init.py /app
-COPY ./rsm-cron /etc/cron.d/
 
 ## Imstall llvm and numba seprately due to ARM64 problem
 RUN apt-get install -y git && pip install yarf && \
