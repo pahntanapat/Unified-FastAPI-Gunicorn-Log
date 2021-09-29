@@ -23,7 +23,25 @@
 	"settings": {},
 
 	// Add the IDs of extensions you want installed when the container is created.
-	"extensions": []
+	"extensions": [
+		"graykode.ai-docstring",
+		"aaron-bond.better-comments",
+		"ms-azuretools.vscode-docker",
+		"mhutchie.git-graph",
+		"tht13.html-preview-vscode",
+		"zignd.html-css-class-completion",
+		"ms-toolsai.jupyter",
+		"ms-toolsai.jupyter-keymap",
+		"yzhang.markdown-all-in-one",
+		"shd101wyy.markdown-preview-enhanced",
+		"christian-kohler.path-intellisense",
+		"esbenp.prettier-vscode",
+		"ms-python.vscode-pylance",
+		"ms-python.python",
+		"foxundermoon.shell-format",
+		"visualstudioexptteam.vscodeintellicode",
+		"redhat.vscode-yaml"
+	]
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
