@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:20.04 AS GUNICORN_FAST_API
 
 RUN TZ="Asia/Bangkok" && \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
@@ -15,8 +15,7 @@ WORKDIR /app
 COPY ./requirements.txt /app
 
 ## Imstall llvm and numba seprately due to ARM64 problem
-RUN apt-get install -y git && pip install yapf pylint && \
-    pip install --no-cache-dir -r requirements.txt 
+RUN pip install --no-cache-dir -r requirements.txt 
 #install --pre torch torchvision -f https://download.pytorch.org/whl/nightly/cpu/torch_nightly.html
 #pip install torch==1.8.1+cpu torchvision==0.9.1+cpu torchaudio==0.8.1 -f https://download.pytorch.org/whl/lts/1.8/torch_lts.html
 #COPY ./engine-sg.json /app/credential.json
@@ -51,3 +50,8 @@ ENV CACHE_DIR=/tmp
 # Expose mongodb
 
 CMD bash start.sh
+
+FROM GUNICORN_FAST_API AS GUNICORN_FAST_API_TEST
+RUN apt-get install -y git && \
+    pip install yapf pylint notebook jupyter_contrib_nbextensions && \
+    jupyter contrib nbextension install
