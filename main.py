@@ -1,3 +1,8 @@
+"""Unified Logging by Logguru for Gunicorn, Uvicorn, and FastAPI Application
+
+Modified from https://pawamoy.github.io/posts/unify-logging-for-a-gunicorn-uvicorn-app/
+"""
+
 import os
 import logging
 import sys
