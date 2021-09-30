@@ -27,4 +27,4 @@ if __name__ == '__main__':
                                       (DEBUG) else logging.INFO),
                            json=(not DEBUG))
     cpu = cpu_count() * 2
-    Gunicorn({"bind": "0.0.0.0:80", "workers": cpu, "threads": cpu * 2})
+    Gunicorn(app, {"bind": "0.0.0.0:80", "workers": cpu, "threads": cpu * 2}).run()
