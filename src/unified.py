@@ -1,4 +1,11 @@
+"""Unified Logging by Logguru for Gunicorn, Uvicorn, and FastAPI Application
+
+Modified from https://pawamoy.github.io/posts/unify-logging-for-a-gunicorn-uvicorn-app/
+"""
+
 import logging
+from sys import stdout
+from typing import Union
 from loguru import logger
 from gunicorn.glogging import Logger
 from gunicorn.app.base import BaseApplication
@@ -65,3 +72,32 @@ class Gunicorn(BaseApplication):
 
     def load(self):
         return self.application
+
+
+def global_config(log_level: Union[str, int] = logging.INFO,
+                  json: bool = True):
+    if isinstance(log_level, str) and (log_level in logging._nameToLevel):
+        log_level = logging.INFO
+
+    intercept_handler = InterceptHandler()
+    # logging.basicConfig(handlers=[intercept_handler], level=LOG_LEVEL)
+    # logging.root.handlers = [intercept_handler]
+    logging.root.setLevel(log_level)
+
+    seen = set()
+    for name in [
+            *logging.root.manager.loggerDict.keys(),
+            "gunicorn",
+            "gunicorn.access",
+            "gunicorn.error",
+            "uvicorn",
+            "uvicorn.access",
+            "uvicorn.error",
+    ]:
+        if name not in seen:
+            seen.add(name.split(".")[0])
+            logging.getLogger(name).handlers = [intercept_handler]
+
+    logger.configure(handlers=[{"sink": stdout, "serialize": json}])
+
+    return logger
