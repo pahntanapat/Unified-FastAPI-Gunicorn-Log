@@ -24,12 +24,16 @@ def test(response: Response):
 
 
 if __name__ == '__main__':
+    ## Config Log
     global_config(log_level=(logging.DEBUG if (DEBUG) else logging.INFO),
                   json=(not DEBUG))
+    
     logger.info('Debug mode: {}'.format(DEBUG))
 
     cpu = cpu_count() * 2
     logger.info('Use CPU Workers = {}'.format(cpu))
+
+    ## Run FastAPI in Gunicorn
     Gunicorn(app, {
         "bind": "0.0.0.0:80",
         "workers": cpu,

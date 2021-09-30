@@ -8,7 +8,10 @@ pip install unified-fastAPI-gunicorn-log
 ```
 
 ## Example
-See [example.py]
+See [example.py](example.py). To run server, follow below command.
+```sh
+python example.py
+```
 
 ----
 &copy; 2021 Tanapat Kahabodeekanokkul
