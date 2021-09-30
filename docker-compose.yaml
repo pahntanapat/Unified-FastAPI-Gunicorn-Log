@@ -7,7 +7,7 @@ services:
     build:
       context: .
       dockerfile: ./dockerfile
-      target: GUNICORN_FAST_API
+      target: gunicorn_fastapi
 
     ports: 
-     - 82:80
+     - 78:80

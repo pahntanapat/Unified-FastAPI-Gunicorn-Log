@@ -1,4 +1,4 @@
-FROM ubuntu:20.04 AS GUNICORN_FAST_API
+FROM ubuntu:20.04 AS gunicorn_fastapi
 
 RUN TZ="Asia/Bangkok" && \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
@@ -51,7 +51,7 @@ ENV CACHE_DIR=/tmp
 
 CMD bash start.sh
 
-FROM GUNICORN_FAST_API AS GUNICORN_FAST_API_TEST
+FROM gunicorn_fastapi AS gunicorn_fastapi_test
 RUN apt-get install -y git && \
     pip install yapf pylint notebook jupyter_contrib_nbextensions && \
     jupyter contrib nbextension install
