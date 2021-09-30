@@ -5,7 +5,8 @@ from fastapi import FastAPI, Response
 from fastapi.responses import ORJSONResponse
 from unified_api_log.gunicorn import global_config, Gunicorn
 
-DEBUG = environ.get('DEBUG', False)
+DEBUG = not (environ.get('DEBUG', False)
+             in {0, '0', '', None, False, 'false', 'False'})
 
 app = FastAPI(
     debug=DEBUG,
@@ -27,4 +28,8 @@ if __name__ == '__main__':
                                       (DEBUG) else logging.INFO),
                            json=(not DEBUG))
     cpu = cpu_count() * 2
-    Gunicorn(app, {"bind": "0.0.0.0:80", "workers": cpu, "threads": cpu * 2}).run()
+    Gunicorn(app, {
+        "bind": "0.0.0.0:80",
+        "workers": cpu,
+        "threads": cpu * 2
+    }).run()
