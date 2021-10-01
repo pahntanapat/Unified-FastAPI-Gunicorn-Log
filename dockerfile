@@ -52,6 +52,7 @@ ENV CACHE_DIR=/tmp
 CMD bash start.sh
 
 FROM gunicorn_fastapi AS gunicorn_fastapi_test
-RUN apt-get install -y git && \
+RUN apt-get install -y git python3.8-venv && \
     pip install yapf pylint notebook jupyter_contrib_nbextensions && \
-    jupyter contrib nbextension install
+    jupyter contrib nbextension install && \
+    python3 -m pip install --upgrade build twine
