@@ -3,11 +3,6 @@
 Inspired and Modified from [Pawamoy&apos;s articles](https://pawamoy.github.io/posts/unify-logging-for-a-gunicorn-uvicorn-app/) 
 """
 
-import logging
-from sys import stdout
-from typing import Union
-from loguru import logger
-from gunicorn.glogging import Logger
 from gunicorn.app.base import BaseApplication
 
 from unified_api_log.log import StubbedGunicornLogger
@@ -16,7 +11,7 @@ from threading import Thread
 
 class MainProcess(BaseApplication):
     """Our Gunicorn application."""
-    def __init__(self, app, options=None):
+    def __init__(self, app, options=None, usage=None, prog=None):
         self.options = options or {}
 
         ## Override Logging configuration
@@ -28,7 +23,7 @@ class MainProcess(BaseApplication):
         })
 
         self.application = app
-        super().__init__()
+        super().__init__(usage, prog)
 
     def load_config(self):
         config = {
@@ -43,7 +38,32 @@ class MainProcess(BaseApplication):
         return self.application
 
 
-class InThread(MainProcess, Thread):
-    def __init__(self, app, options=None):
-        Thread.__init__(self)
-        MainProcess.__init__(self, app, options)
+class InThread(Thread, MainProcess):
+    def __init__(self,
+                 app,
+                 gunicorn_options=None,
+                 usage=None,
+                 prog=None,
+                 group=None,
+                 target=None,
+                 name=None,
+                 args=(),
+                 kwargs=None,
+                 *,
+                 daemon=None):
+        Thread.__init__(self,
+                        group=group,
+                        target=target,
+                        name=name,
+                        args=args,
+                        kwargs=kwargs,
+                        daemon=daemon)
+        MainProcess.__init__(self,
+                             app,
+                             gunicorn_options,
+                             usage=usage,
+                             prog=prog)
+
+    def start(self):
+        super().start()
+        MainProcess.run(self)
