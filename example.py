@@ -4,7 +4,8 @@ from loguru import logger
 from sys import argv
 from os import cpu_count, environ
 from fastapi import FastAPI, Response
-from unified_api_log.gunicorn import global_config, MainProcess
+from unified_api_log.gunicorn import InThread
+from unified_api_log.log import global_config
 
 DEBUG = not (environ.get('DEBUG', argv[1] if (len(argv) > 1) else False)
              in {0, '0', '', None, False, 'false', 'False'})
@@ -34,8 +35,10 @@ if __name__ == '__main__':
     logger.info('Use CPU Workers = {}'.format(cpu))
 
     ## Run FastAPI in Gunicorn
-    MainProcess(app, {
+    InThread(app, {
         "bind": "0.0.0.0:80",
         "workers": cpu,
         "threads": cpu * 2
-    }).run()
+    }).start()
+
+    logger.info('Run Gunicorn in Thread')
