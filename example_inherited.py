@@ -24,8 +24,9 @@ def test(response: Response):
     return {'response_time': datetime.now().isoformat(), 'debug': DEBUG}
 
 
-def some_thread():
-    logger.info('Run Gunicorn in Thread')
+class SomeThread(InThread):
+    def run(self) -> None:
+        logger.info('Message from thread')
 
 
 if __name__ == '__main__':
@@ -40,12 +41,11 @@ if __name__ == '__main__':
 
     ## Run FastAPI in Gunicorn
 
-    thr = InThread(app, {
+    thr = SomeThread(app, {
         "bind": "0.0.0.0:80",
         "workers": cpu,
         "threads": cpu * 2
-    },
-                   target=some_thread)
+    })
 
     thr.start()
     thr.join()
