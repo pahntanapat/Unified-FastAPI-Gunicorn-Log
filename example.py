@@ -25,7 +25,7 @@ def test(response: Response):
 
 
 def some_thread():
-    logger.info('Run Gunicorn in Thread')
+    logger.info('Message from Thread')
 
 
 if __name__ == '__main__':
