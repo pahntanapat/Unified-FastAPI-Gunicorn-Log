@@ -4,7 +4,6 @@ from sys import stdout
 from typing import Union
 from loguru import logger
 from gunicorn.glogging import Logger
-from gunicorn.app.base import BaseApplication
 
 class InterceptHandler(logging.Handler):
     def emit(self, record):
