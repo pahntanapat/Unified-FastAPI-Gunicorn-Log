@@ -3,7 +3,11 @@
 Inspired and Modified from [Pawamoy&apos;s articles](https://pawamoy.github.io/posts/unify-logging-for-a-gunicorn-uvicorn-app/) 
 """
 
+from signal import SIGTERM, SIGHUP
 from gunicorn.app.base import BaseApplication
+from gunicorn.arbiter import Arbiter
+from loguru import logger
+from sys import stderr, exit
 
 from unified_api_log.log import StubbedGunicornLogger
 from threading import Thread
@@ -23,6 +27,7 @@ class MainProcess(BaseApplication):
         })
 
         self.application = app
+        self.sig = None
         super().__init__(usage, prog)
 
     def load_config(self):
@@ -36,6 +41,24 @@ class MainProcess(BaseApplication):
 
     def load(self):
         return self.application
+
+    def run(self):
+        try:
+            arbiter = Arbiter(self)
+            self.sig = arbiter.signal
+            arbiter.run()
+        except RuntimeError as e:
+            self.logger("Error: %s" % e)
+            stderr.flush()
+            exit(1)
+
+    def restart(self):
+        if self.sig is not None:
+            self.sig(SIGHUP, None)
+
+    def end(self):
+        if self.sig is not None:
+            self.sig(SIGTERM, None)
 
 
 class InThread(Thread, MainProcess):
