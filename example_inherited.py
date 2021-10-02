@@ -1,10 +1,15 @@
+""" ## Uncomment for debug d
+from sys import path
+path.append('src') """
+
 from datetime import datetime
 import logging
+from time import sleep
 from loguru import logger
 from sys import argv
 from os import cpu_count, environ
 from fastapi import FastAPI, Response
-from unified_api_log.gunicorn import InThread, MainProcess
+from unified_api_log.gunicorn import InThread
 from unified_api_log.log import global_config
 
 DEBUG = not (environ.get('DEBUG', argv[1] if (len(argv) > 1) else False)
@@ -28,6 +33,14 @@ class SomeThread(InThread):
     def run(self) -> None:
         logger.info('Message from thread')
 
+        sleep(10)
+        logger.info('Restart server')
+        self.restart()
+
+        sleep(10)
+        logger.info('End server')
+        self.end()
+
 
 if __name__ == '__main__':
     ## Config Log
@@ -41,11 +54,13 @@ if __name__ == '__main__':
 
     ## Run FastAPI in Gunicorn
 
-    thr = SomeThread(app, {
+    server = SomeThread(app, {
         "bind": "0.0.0.0:80",
         "workers": cpu,
         "threads": cpu * 2
     })
 
-    thr.start()
-    thr.join()
+    server.start()
+    logger.info('message after server start in main thread')
+    server.join()
+    logger.info('message after server thread join in main thread')

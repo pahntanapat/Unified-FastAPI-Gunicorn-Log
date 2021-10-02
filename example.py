@@ -1,10 +1,16 @@
+"""  ## Uncomment for debug d
+from sys import path
+path.append('src')
+ """
+
 from datetime import datetime
 import logging
+from time import sleep
 from loguru import logger
 from sys import argv
 from os import cpu_count, environ
 from fastapi import FastAPI, Response
-from unified_api_log.gunicorn import InThread, MainProcess
+from unified_api_log.gunicorn import InThread
 from unified_api_log.log import global_config
 
 DEBUG = not (environ.get('DEBUG', argv[1] if (len(argv) > 1) else False)
@@ -24,8 +30,24 @@ def test(response: Response):
     return {'response_time': datetime.now().isoformat(), 'debug': DEBUG}
 
 
+server = None
+
+
 def some_thread():
     logger.info('Message from Thread')
+    sleep(10)
+    if server is None:
+        logger.warning('Server global var is {}'.format(server))
+    else:
+        """
+        ## If restart server in function, the variable of server will not work after this
+        logger.info('Restart server')
+        server.restart()
+          """
+
+        sleep(10)
+        logger.info('End server')
+        server.end()
 
 
 if __name__ == '__main__':
@@ -40,12 +62,14 @@ if __name__ == '__main__':
 
     ## Run FastAPI in Gunicorn
 
-    thr = InThread(app, {
+    server = InThread(app, {
         "bind": "0.0.0.0:80",
         "workers": cpu,
         "threads": cpu * 2
     },
-                   target=some_thread)
+                      target=some_thread)
 
-    thr.start()
-    thr.join()
+    server.start()
+    logger.info('message after server start in main thread')
+    server.join()
+    logger.info('message after server thread join in main thread')
