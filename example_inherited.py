@@ -30,16 +30,15 @@ def test(response: Response):
 
 
 class SomeThread(InThread):
-    def run(self) -> None:
+    def run_to_end(self) -> None:
         logger.info('Message from thread')
 
         sleep(10)
-        logger.info('Restart server')
+        logger.warning('Restart server')
         self.restart()
 
         sleep(10)
-        logger.info('End server')
-        self.end()
+        logger.warning('End server')
 
 
 if __name__ == '__main__':

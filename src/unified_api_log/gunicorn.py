@@ -3,10 +3,9 @@
 Inspired and Modified from [Pawamoy&apos;s articles](https://pawamoy.github.io/posts/unify-logging-for-a-gunicorn-uvicorn-app/) 
 """
 
-from signal import SIGINT, SIGTERM, SIGHUP
+from signal import SIGINT
 from gunicorn.app.base import BaseApplication
 from gunicorn.arbiter import Arbiter
-from loguru import logger
 from sys import stderr, exit
 
 from unified_api_log.log import StubbedGunicornLogger
@@ -27,7 +26,7 @@ class MainProcess(BaseApplication):
         })
 
         self.application = app
-        self.sig = None
+        self.arbiter = None
         super().__init__(usage, prog)
 
     def load_config(self):
@@ -44,25 +43,30 @@ class MainProcess(BaseApplication):
 
     def run(self):
         try:
-            arbiter = Arbiter(self)
-            self.sig = arbiter.signal
-            arbiter.run()
+            self.arbiter = Arbiter(self)
+            self.arbiter.run()
         except RuntimeError as e:
             self.logger("Error: %s" % e)
             stderr.flush()
             exit(1)
 
     def restart(self):
-        if self.sig is not None:
-            self.sig(SIGHUP, None)
+        restart_thr = Thread(target=self.__restart)
+        restart_thr.start()
+        return restart_thr
+
+    def __restart(self):
+        BaseApplication.reload(self)
+        if self.arbiter is not None:
+            self.arbiter.reload()
 
     def end(self):
-        if self.sig is not None:
-            self.sig(SIGTERM, None)
+        if self.arbiter is not None:
+            self.arbiter.signal(SIGINT, None)
 
     def terminate(self):
-        if self.sig is not None:
-            self.sig(SIGINT, None)
+        if self.arbiter is not None:
+            self.arbiter.signal(SIGINT, None)
 
 
 class InThread(Thread, MainProcess):
@@ -103,4 +107,6 @@ class InThread(Thread, MainProcess):
         MainProcess.run(self)
 
     def run_to_end(self):
-        raise NotImplementedError('Run to End is not implemented. Please override run_to_end or run method, or set target parameter in constructor.')
+        raise NotImplementedError(
+            'Run to End is not implemented. Please override run_to_end or run method, or set target parameter in constructor.'
+        )

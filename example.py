@@ -1,7 +1,7 @@
-"""  ## Uncomment for debug d
+## Uncomment for debug d
 from sys import path
+
 path.append('src')
- """
 
 from datetime import datetime
 import logging
@@ -39,14 +39,13 @@ def some_thread():
     if server is None:
         logger.warning('Server global var is {}'.format(server))
     else:
-        """
+
         ## If restart server in function, the variable of server will not work after this
-        logger.info('Restart server')
+        logger.warning('Restart server')
         server.restart()
-          """
 
         sleep(10)
-        logger.info('End server')
+        logger.warning('End server')
         server.end()
 
 
