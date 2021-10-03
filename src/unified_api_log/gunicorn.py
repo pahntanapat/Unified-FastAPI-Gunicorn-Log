@@ -3,7 +3,7 @@
 Inspired and Modified from [Pawamoy&apos;s articles](https://pawamoy.github.io/posts/unify-logging-for-a-gunicorn-uvicorn-app/) 
 """
 
-from signal import SIGTERM, SIGHUP
+from signal import SIGINT, SIGTERM, SIGHUP
 from gunicorn.app.base import BaseApplication
 from gunicorn.arbiter import Arbiter
 from loguru import logger
@@ -60,6 +60,10 @@ class MainProcess(BaseApplication):
         if self.sig is not None:
             self.sig(SIGTERM, None)
 
+    def terminate(self):
+        if self.sig is not None:
+            self.sig(SIGINT, None)
+
 
 class InThread(Thread, MainProcess):
     def __init__(self,
@@ -74,6 +78,9 @@ class InThread(Thread, MainProcess):
                  kwargs=None,
                  *,
                  daemon=None):
+
+        if target is None:
+            target = self.__run_and_end
         Thread.__init__(self,
                         group=group,
                         target=target,
@@ -87,6 +94,13 @@ class InThread(Thread, MainProcess):
                              usage=usage,
                              prog=prog)
 
+    def __run_and_end(self):
+        self.run_to_end()
+        self.end()
+
     def start(self):
         super().start()
         MainProcess.run(self)
+
+    def run_to_end(self):
+        raise NotImplementedError('Run to End is not implemented. Please override run_to_end or run method, or set target parameter in constructor.')
